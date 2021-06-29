@@ -277,7 +277,7 @@ int main(int argc, char** argv) {
         Point p(-1, -1);
         while (true) {
             int x, y;
-            int out;
+//            int out;
 //            int xx,yy;
 //            int cur;
 //            int a,b,c,d,e,f,g,h;
@@ -285,39 +285,10 @@ int main(int argc, char** argv) {
             if (!(fin >> x)) break;
             if (!(fin >> y)) break;
             p.x = x; p.y = y;
-            std::cout << x<<" "<<y;
-            if (!(fin >> out)) break;
-            std::cout<<" dif:" <<out;
-//            if (!(fin >> xx)) break;
-//            std::cout<<" black:" <<xx;
-//            if (!(fin >> yy)) break;
-//            std::cout<<" white:" <<yy;
-//            if (!(fin >> cur)) break;
-//            std::cout<<" empty:" <<cur;
-//            if (!(fin >> a)) break;
-//            std::cout<<" points dif:" <<a;
-//            if (!(fin >> b)) break;
-//            std::cout<<" " <<b;
-//            if (!(fin >> c)) break;
-//            std::cout<<" " <<c;
-//            if (!(fin >> d)) break;
-//            std::cout<<" " <<d;
-//            if (!(fin >> e)) break;
-//            std::cout<<" " <<e;
-//            if (!(fin >> f)) break;
-//            std::cout<<" " <<f;
-//            if (!(fin >> g)) break;
-//            std::cout<<" " <<g;
-//            if (!(fin >> h)) break;
-//            std::cout<<" " <<h;
-//            if (!(fin >> ans)) break;
-//            std::cout<<" " <<ans;
-//            for (int i = 0; i < 8; i++) {
-//        for (int j = 0; j < 8; j++) {
-//            if (!(fin >> board[i][j])) break;
-//            std::cout<<" " <<board[i][j];
-//        }
-//    }
+//            std::cout << x<<" "<<y;
+//            if (!(fin >> out)) break;
+//            std::cout<<" dif:" <<out;
+
             
             
         }

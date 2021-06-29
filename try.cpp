@@ -198,24 +198,25 @@ void read_valid_spots(std::ifstream& fin) {
             return true;
         }
     };
-                int minimax(TreeNode* Node, int depth, bool isMax,float record){
+                int minimax(TreeNode* Node, int depth, bool isMax,float record,float alpha,float beta){
         //            int score = point(Node);
-
-                    
-                    if (depth == 2){
-                    return record;
+                    if(depth == 3){
+                        return record;
                     }
-       
-                 
                     // If this maximizer's move
                     if (isMax)//ismax=true換我
                     {
-                        int bestval = -1000;
+                        int bestval = -10000;
                         int moveval = 0;
                         // Traverse all cells
                         int n_valid_spots = (Node->next_spots).size();
                         if(n_valid_spots==0){
-                            return 999;
+                            
+                            if(Node->disc_count[player]-Node->disc_count[opponent]>0){
+                                return 9999;
+                            }else{
+                            return -9999;//因為如果第一層只剩一點可下 要回傳-999比第一層bestval3大 才會選這個回傳的值
+                            }
                         }
                         for(int i=0;i<n_valid_spots;i++){//走訪可走的點
                             Point p = Node->next_spots[i];
@@ -224,15 +225,33 @@ void read_valid_spots(std::ifstream& fin) {
                             TreeNode *newNode = new TreeNode(now, p.x, p.y,player);//下了其之後變成的node
         //                    newNode->cur_player = Node->cur_player;
                             newNode->put_disc(p);
+                            
+//                            if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+//                                record+=3000;
+//                            }//3贏4輸
+                          
                             newNode->score = newNode->disc_count[player]-newNode->disc_count[opponent];
-                             record+= 0.7*( newNode->disc_count[player]-newNode->disc_count[opponent]);
-                                   
-                            moveval = minimax(newNode, depth+1, false,record);
+//                           if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+//                               record+=3;
+//                           }
+                            record+= 5*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+//                            if((p.x==0&&p.y==0)||(p.x==0&&p.y==7)||(p.x==7&&p.y==0)||(p.x==7&&p.y==7)){
+//                                record+=2*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+//                                                                                  }
+                            moveval = minimax(newNode, depth+1, false,record,alpha,beta);
+                            record = 0;
                                 if(moveval>bestval){
 //
                                     bestval = moveval;
             
                             }
+                            if(moveval>alpha){
+                                alpha = moveval;
+                            }
+                            if (beta <= alpha){
+                                break;
+                            }
+                            
                         }
                        
                         return bestval;
@@ -242,12 +261,16 @@ void read_valid_spots(std::ifstream& fin) {
                     // If this minimizer's move
                     else
                     {
-                        int bestval2 = 1000;
+                        int bestval2 = 10000;
                         int moveval = 0;
                         // Traverse all cells
                         int n_valid_spots = (Node->next_spots).size();
                         if(n_valid_spots==0){
-                            return -999;//因為如果第一層只剩一點可下 要回傳-999比第一層bestval3大 才會選這個回傳的值
+                            if(Node->disc_count[player]-Node->disc_count[opponent]>0){
+                                return 9999;
+                            }else{
+                            return -9999;
+                            }
                         }
    
                         for(int i=0;i<n_valid_spots;i++){//走訪可走的點
@@ -258,11 +281,39 @@ void read_valid_spots(std::ifstream& fin) {
        
                         newNode->put_disc(p);
                         newNode->score = newNode->disc_count[player]-newNode->disc_count[opponent];
-                         record+= 0.8*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+                       
+                        if(depth==0){
+                            record+= 8*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+                            
+                            
+//                            if((p.x==0&&p.y==0)||(p.x==0&&p.y==7)||(p.x==7&&p.y==0)||(p.x==7&&p.y==7)){
+//                                return -9999;
+//                                                   }//5輸
+                            }
+                        else if(depth==2){
+                            record+= 2*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+//                            if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+//                                record+=1*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+//                                                   }//5輸
+                            }
+//                            if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+//                                record+=3000;
+//                            }//3贏4輸
+                    
+                            
                         
-                        moveval = minimax(newNode,depth+1, true,record);
+                        
+                        
+                        moveval = minimax(newNode,depth+1, true,record,alpha,beta);
+                        record = 0;
                         if(moveval<bestval2){
                             bestval2 = moveval;
+                            }
+                        if(moveval<beta){
+                            beta = moveval;
+                            }
+                        if (beta <= alpha){
+                            break;
                             }
            
                         }
@@ -274,9 +325,12 @@ void read_valid_spots(std::ifstream& fin) {
 
     
         void firstPlayer(std::ofstream& fout){
-            int bestval3 = -1000;
+            int bestval3 = -10000;
+            int alpha = -10000;
+            int beta = 10000;
             int moveval = 0;
             Point bestpoint(-1,-1);
+//            Point q(-1,-1);
 
             int n_valid_spots = next_valid_spots.size();
             for(int i=0;i<n_valid_spots;i++){//走訪可走的點
@@ -284,20 +338,45 @@ void read_valid_spots(std::ifstream& fin) {
                 //下棋 建立newstate
                 TreeNode *newNode = new TreeNode(board, p.x, p.y,player);//下了其之後變成的node
                 newNode->put_disc(p);
-                float record = newNode->disc_count[player]-newNode->disc_count[opponent];
+                
+                int record = 10*(newNode->disc_count[player]-newNode->disc_count[opponent]);
+                if((p.x==0&&p.y==0)||(p.x==0&&p.y==7)||(p.x==7&&p.y==0)||(p.x==7&&p.y==7)){
+                    bestpoint=p;
+                    break;
+                }
+                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)||
+                   (p.x==0&&p.y==1)||(p.x==0&&p.y==6)||(p.x==7&&p.y==1)||(p.x==7&&p.y==6)||
+                   (p.x==1&&p.y==0)||(p.x==1&&p.y==7)||(p.x==6&&p.y==0)||(p.x==6&&p.y==7)){
+                    record-=9999;
+                }
+//                record+=n_valid_spots*10;
+//                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+//                    record-=5000;
+//                }
+//                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+//                    record+=;
+//                }
                 newNode->score = newNode->disc_count[player]-newNode->disc_count[opponent];
                 
                 
-                moveval = minimax(newNode,0,false,record);
+                moveval = minimax(newNode,0,false,record,alpha,beta);
+                record = 0;
+                
+                
                 if(moveval>bestval3){
                     bestpoint = p;
                     bestval3 = moveval;
                 }
-                
+                if(moveval>alpha){
+                    alpha = moveval;
+                }
+                if (beta <= alpha){
+                    break;
+                }
             }
 
             fout << bestpoint.x << " " << bestpoint.y <<std::endl;
-                fout.flush();
+            fout.flush();
           
         }
 

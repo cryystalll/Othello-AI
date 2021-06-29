@@ -42,7 +42,7 @@ void write_valid_spot(std::ofstream& fout) {
     // Remember to flush the output to ensure the last action is written to file.
     fout << p.x << " " << p.y << std::endl;
     // Simulate partial output (if killed by game manager)
-    fout << p.x << " ";
+//    fout << p.x << " ";
     fout.flush();
 }
 
