@@ -8,20 +8,20 @@
 
 struct Point {
     int x, y;
-	Point() : Point(0, 0) {}
-	Point(float x, float y) : x(x), y(y) {}
-	bool operator==(const Point& rhs) const {
-		return x == rhs.x && y == rhs.y;
-	}
-	bool operator!=(const Point& rhs) const {
-		return !operator==(rhs);
-	}
-	Point operator+(const Point& rhs) const {
-		return Point(x + rhs.x, y + rhs.y);
-	}
-	Point operator-(const Point& rhs) const {
-		return Point(x - rhs.x, y - rhs.y);
-	}
+    Point() : Point(0, 0) {}
+    Point(float x, float y) : x(x), y(y) {}
+    bool operator==(const Point& rhs) const {
+        return x == rhs.x && y == rhs.y;
+    }
+    bool operator!=(const Point& rhs) const {
+        return !operator==(rhs);
+    }
+    Point operator+(const Point& rhs) const {
+        return Point(x + rhs.x, y + rhs.y);
+    }
+    Point operator-(const Point& rhs) const {
+        return Point(x - rhs.x, y - rhs.y);
+    }
 };
 
 class OthelloBoard {
@@ -80,7 +80,7 @@ private:
         }
         return false;
     }
-    void flip_discs(Point center) {//下的那顆旗子
+    void flip_discs(Point center) {
         for (Point dir: directions) {
             // Move along the direction while testing.
             Point p = center + dir;
@@ -232,7 +232,7 @@ const std::string file_log = "gamelog.txt";
 const std::string file_state = "state";
 const std::string file_action = "action";
 // Timeout is set to 10 when TA test your code.
-const int timeout = 5;
+const int timeout = 1;
 
 void launch_executable(std::string filename) {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -277,20 +277,9 @@ int main(int argc, char** argv) {
         Point p(-1, -1);
         while (true) {
             int x, y;
-//            int out;
-//            int xx,yy;
-//            int cur;
-//            int a,b,c,d,e,f,g,h;
-//            int ans;
             if (!(fin >> x)) break;
             if (!(fin >> y)) break;
             p.x = x; p.y = y;
-//            std::cout << x<<" "<<y;
-//            if (!(fin >> out)) break;
-//            std::cout<<" dif:" <<out;
-
-            
-            
         }
         fin.close();
         // Reset action file

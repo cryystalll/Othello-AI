@@ -74,6 +74,7 @@ void read_valid_spots(std::ifstream& fin) {
         int score = 0;
          std::array<std::array<int, SIZE>, SIZE> boardState ;//這個node自己的棋盤
         std::vector<Point> next_spots;
+        std::vector<Point> opp_next_spots;
         std::array<int, 3> disc_count;
         int cur_player;
        
@@ -126,6 +127,19 @@ void read_valid_spots(std::ifstream& fin) {
             }
             return valid_spots;
         }
+        std::vector<Point> get_opponent_spots() const {
+            std::vector<Point> valid_spots;
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j < SIZE; j++) {
+                    Point p = Point(i, j);
+                    if (boardState[i][j] != 0)
+                        continue;
+                    if (is_opponent_valid(p))
+                        valid_spots.push_back(p);
+                }
+            }
+            return valid_spots;
+        }
         
         bool is_spot_on_board(Point p) const {//點在範圍之內
             return 0 <= p.x && p.x < SIZE && 0 <= p.y && p.y < SIZE;
@@ -161,6 +175,24 @@ void read_valid_spots(std::ifstream& fin) {
             }
             return false;
         }
+         bool is_opponent_valid(Point center) const {//找下一個可嚇得點
+                    if (get_disc(center) != 0)//不是空的不能下
+                        return false;
+                    for (Point dir: directions) {
+                        // Move along the direction while testing.
+                        Point p = center + dir;
+        //                int nextplayer = 3-cur_player;
+                        if (!is_disc_at(p, get_next_player(3-cur_player)))//上面不是敵人旗子
+                            continue;//繼續找
+                        p = p + dir;
+                        while (is_spot_on_board(p) && get_disc(p) != 0) {//上面有棋子
+                            if (is_disc_at(p, 3-cur_player))
+                                return true;
+                            p = p + dir;
+                        }
+                    }
+                    return false;
+                }
         void flip_discs(Point center) {//下的那顆旗子
             for (Point dir: directions) {
                 // Move along the direction while testing.
@@ -193,11 +225,117 @@ void read_valid_spots(std::ifstream& fin) {
 //             Give control to the other player.
             cur_player = get_next_player(cur_player);
             next_spots = get_valid_spots();
+            opp_next_spots = get_opponent_spots();
 //            // Check Win
 //
             return true;
         }
     };
+            int calculate(TreeNode* node){
+                    array<array<int, SIZE>, SIZE> thisboard = node->boardState;
+                     int mypoint = node->disc_count[player];
+                     int empty = node->disc_count[0];
+                     float borderratio, spotratio;
+                     empty+=36;
+                     mypoint*=100;//1.
+                    
+                     int dx[2] = {0,7};
+                     int dy[2] = {0,7};
+                     
+                     
+                    int mycorner = 0;
+                    int oppcorner = 0;
+                     
+                     if(thisboard[dx[0]][dy[0]]==player){
+                         mycorner++;
+                     }else if(thisboard[dx[0]][dy[0]]==opponent){
+                         oppcorner++;
+                     }
+                     if(thisboard[dx[0]][dy[1]]==player){
+                                mycorner++;
+                            }else if(thisboard[dx[0]][dy[1]]==opponent){
+                                oppcorner++;
+                            }
+                     if(thisboard[dx[1]][dy[0]]==player){
+                                mycorner++;
+                            }else if(thisboard[dx[1]][dy[0]]==opponent){
+                                oppcorner++;
+                            }
+                     if(thisboard[dx[1]][dy[1]]==player){
+                                mycorner++;
+                            }else if(thisboard[dx[1]][dy[1]]==opponent){
+                                oppcorner++;
+                            }
+                     int cornerdif = mycorner - oppcorner;
+                     
+                     cornerdif*=12500;//2.
+
+                      int  opp_nextto_corner = 0;
+                      int k = node->opp_next_spots.size();
+                              for(int i = 0; i < k; i++){
+                                  Point p = node->opp_next_spots[i];
+                                  if((p.x==0&&p.y==0)||(p.x==0&&p.y==7)||(p.x==7&&p.y==0)||(p.x==7&&p.y==7)){
+                                      opp_nextto_corner++;
+                                  }
+                              }
+                      opp_nextto_corner*=5000;//3.
+
+                         int myborder = 0;
+                        int oppborder = 0;
+                 //        int test1=0,test2=0;
+                         for(int i = 1;i < 7;i++){
+                             if(thisboard[0][i]==player){
+                                 myborder++;
+                             }else if(thisboard[0][i]==opponent){
+                                 oppborder++;
+                             }
+                         }
+                         for(int i = 1;i < 7;i++){
+                             if(thisboard[i][0]==player){
+                                 myborder++;
+                             }else if(thisboard[i][0]==opponent){
+                                 oppborder++;
+                             }
+                         }
+                         for(int i = 1;i < 7;i++){
+                             if(thisboard[7][i]==player){
+                                 myborder++;
+                             }else if(thisboard[7][i]==opponent){
+                                 oppborder++;
+                             }
+                         }
+                         for(int i = 1;i < 7;i++){
+                             if(thisboard[i][7]==player){
+                                 myborder++;
+                             }else if(thisboard[i][7]==opponent){
+                                 oppborder++;
+                             }
+                         }
+                         myborder+=mycorner;
+                         oppborder+=oppcorner;
+                int allborder=myborder+oppborder;
+                     if(allborder>0){
+                         borderratio = 100.0*myborder/allborder;
+                         borderratio*=5;//4.
+                     }
+                         else{
+                             borderratio=0;
+                         }
+
+                int allnextspot = (node->next_spots.size() + node->opp_next_spots.size());
+                    if(allnextspot>0){
+                         spotratio = 100.0*node->next_spots.size()/allnextspot;
+                                spotratio*=empty;//5.
+                        }else{
+                                spotratio=0;
+                        }
+//                spotratio*=100;
+                
+                int finalpoint = mypoint + borderratio + spotratio + cornerdif - opp_nextto_corner;
+ //
+                return  finalpoint;
+            }
+
                 int minimax(TreeNode* Node, int depth, bool isMax,float record,float alpha,float beta){
         //            int score = point(Node);
                     if(depth == 3){
@@ -206,16 +344,16 @@ void read_valid_spots(std::ifstream& fin) {
                     // If this maximizer's move
                     if (isMax)//ismax=true換我
                     {
-                        int bestval = -10000;
-                        int moveval = 0;
+                        float bestval = -100000;
+                        float moveval = 0;
                         // Traverse all cells
                         int n_valid_spots = (Node->next_spots).size();
                         if(n_valid_spots==0){
                             
                             if(Node->disc_count[player]-Node->disc_count[opponent]>0){
-                                return 9999;
+                                return 88888;
                             }else{
-                            return -9999;//因為如果第一層只剩一點可下 要回傳-999比第一層bestval3大 才會選這個回傳的值
+                            return -88888;//因為如果第一層只剩一點可下 要回傳-999比第一層bestval3大 才會選這個回傳的值
                             }
                         }
                         for(int i=0;i<n_valid_spots;i++){//走訪可走的點
@@ -234,7 +372,7 @@ void read_valid_spots(std::ifstream& fin) {
 //                           if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
 //                               record+=3;
 //                           }
-                            record+= 5*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+                            record+= 0.5*calculate(newNode);
 //                            if((p.x==0&&p.y==0)||(p.x==0&&p.y==7)||(p.x==7&&p.y==0)||(p.x==7&&p.y==7)){
 //                                record+=2*( newNode->disc_count[player]-newNode->disc_count[opponent]);
 //                                                                                  }
@@ -261,16 +399,24 @@ void read_valid_spots(std::ifstream& fin) {
                     // If this minimizer's move
                     else
                     {
-                        int bestval2 = 10000;
-                        int moveval = 0;
+                        float bestval2 = 100000;
+                        float moveval = 0;
                         // Traverse all cells
                         int n_valid_spots = (Node->next_spots).size();
                         if(n_valid_spots==0){
+                            if(depth==2){
                             if(Node->disc_count[player]-Node->disc_count[opponent]>0){
-                                return 9999;
+                                return 99999;
                             }else{
-                            return -9999;
+                            return -99999;
                             }
+                            }else{
+                               if(Node->disc_count[player]-Node->disc_count[opponent]>0){
+                                    return record;
+                                }else{
+                                return record ;
+                            }
+                        }
                         }
    
                         for(int i=0;i<n_valid_spots;i++){//走訪可走的點
@@ -283,7 +429,7 @@ void read_valid_spots(std::ifstream& fin) {
                         newNode->score = newNode->disc_count[player]-newNode->disc_count[opponent];
                        
                         if(depth==0){
-                            record+= 8*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+                            record+= 0.8*calculate(newNode);
                             
                             
 //                            if((p.x==0&&p.y==0)||(p.x==0&&p.y==7)||(p.x==7&&p.y==0)||(p.x==7&&p.y==7)){
@@ -291,7 +437,7 @@ void read_valid_spots(std::ifstream& fin) {
 //                                                   }//5輸
                             }
                         else if(depth==2){
-                            record+= 2*( newNode->disc_count[player]-newNode->disc_count[opponent]);
+                            record+= 0.2*calculate(newNode);
 //                            if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
 //                                record+=1*( newNode->disc_count[player]-newNode->disc_count[opponent]);
 //                                                   }//5輸
@@ -325,37 +471,39 @@ void read_valid_spots(std::ifstream& fin) {
 
     
         void firstPlayer(std::ofstream& fout){
-            int bestval3 = -10000;
-            int alpha = -10000;
-            int beta = 10000;
-            int moveval = 0;
+            float bestval3 = -150000;
+            float alpha = -150000;
+            float beta = 150000;
+            float moveval = 0;
             Point bestpoint(-1,-1);
 //            Point q(-1,-1);
-
+            int cnt=0;
             int n_valid_spots = next_valid_spots.size();
+            for(int i=0;i<n_valid_spots;i++){
+                Point p = next_valid_spots[i];
+                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+                    cnt++;
+                }
+            }
+            
             for(int i=0;i<n_valid_spots;i++){//走訪可走的點
                 Point p = next_valid_spots[i];
                 //下棋 建立newstate
                 TreeNode *newNode = new TreeNode(board, p.x, p.y,player);//下了其之後變成的node
                 newNode->put_disc(p);
                 
-                int record = 10*(newNode->disc_count[player]-newNode->disc_count[opponent]);
+                float record = 1.0*calculate(newNode);
                 if((p.x==0&&p.y==0)||(p.x==0&&p.y==7)||(p.x==7&&p.y==0)||(p.x==7&&p.y==7)){
                     bestpoint=p;
                     break;
                 }
-                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)||
-                   (p.x==0&&p.y==1)||(p.x==0&&p.y==6)||(p.x==7&&p.y==1)||(p.x==7&&p.y==6)||
-                   (p.x==1&&p.y==0)||(p.x==1&&p.y==7)||(p.x==6&&p.y==0)||(p.x==6&&p.y==7)){
-                    record-=9999;
+
+                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
+                    record-=99999;//用這個先手可全贏 但用break+上面return改掉後手4可以贏比較多
                 }
-//                record+=n_valid_spots*10;
-//                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
-//                    record-=5000;
-//                }
-//                if((p.x==1&&p.y==1)||(p.x==1&&p.y==6)||(p.x==6&&p.y==1)||(p.x==6&&p.y==6)){
-//                    record+=;
-//                }
+                
+//
+//
                 newNode->score = newNode->disc_count[player]-newNode->disc_count[opponent];
                 
                 
