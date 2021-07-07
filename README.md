@@ -29,5 +29,5 @@
 *  Please google Othello
 
 
-![Variable Declaration](/img/chess.png)
+![Variable Declaration](/img/1.png)
 
