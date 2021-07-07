@@ -1,6 +1,6 @@
 # Othello-AI
 ## An Othello AI can play game with intellegent strategy using C++ language
-* This project rank at top 30 in class AI competition
+## This project rank at top 30 in class AI competition
 
 * Minmax
 * Alpha Beta Pruning
