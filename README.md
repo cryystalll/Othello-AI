@@ -29,5 +29,6 @@
 *  Please google Othello
 
 
+
 ![Variable Declaration](/img/1.png)
 
