@@ -32,3 +32,4 @@
 
 ![Variable Declaration](/img/1.png)
 
+
